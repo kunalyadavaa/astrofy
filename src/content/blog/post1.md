@@ -2,12 +2,8 @@
 title: "Proxmox VE Cluster"
 description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 pubDate: "Sep 10 2022"
-heroImage: "/post_img.webp"
+heroImage: "/public/2678585.png
 tags: ["tokio"]
----
-
-Here is a complete **project article** on setting up a **Proxmox VE Cluster**, designed for enthusiasts or professionals looking to build a home lab or small-scale production environment. I’ll include placeholder sections for **photos/screenshots** and describe what should be shown in each. Let me know if you'd like the actual screenshots, and I can generate illustrative mockups.
-
 ---
 
 # 🖥️ Building a Proxmox VE Cluster for Home Lab or Production Use
@@ -199,21 +195,3 @@ You now have a **functional Proxmox VE cluster** capable of managing your VMs an
 - Enable 2FA and Let's Encrypt for secure access
 
 ---
-
-## 📸 Appendix: Suggested Image Captures
-
-| Step | Description                        |
-| ---- | ---------------------------------- |
-| 1    | Lab setup/network diagram          |
-| 2    | Proxmox ISO installer screen       |
-| 3    | SSH terminal between nodes         |
-| 4    | pvecm cluster status               |
-| 5    | Proxmox GUI showing 3-node cluster |
-| 6    | Storage addition (NFS/Ceph)        |
-| 7    | HA migration example               |
-| 8    | Cluster summary dashboard          |
-| 9    | Backup settings or update commands |
-
----
-
-Would you like this exported as a **PDF with actual images**, or should I generate mock images and convert it for download?
