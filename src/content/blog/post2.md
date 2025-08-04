@@ -1,16 +1,225 @@
 ---
-title: "Demo Post 2"
-description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-pubDate: "Sep 11 2022"
-heroImage: "/post_img.webp"
+title: "Terraform"
+description: "Terraform is a powerful Infrastructure as Code (IaC) tool developed by HashiCorp that allows you to define and provision infrastructure across multiple providers.
+
+In this guide, we’ll configure **Terraform to automate VM provisioning in a Proxmox VE Cluster**. This enables reproducible, version-controlled deployments—perfect for home labs or scalable environments.
+"
+pubDate: "March 15 2025"
+heroImage: "/Terraform icon.webp"
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
+# ⚙️ Infrastructure as Code in Home Lab: Terraform Setup with Proxmox VE Cluster
 
-Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc. Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra massa massa ultricies mi.
+## 🌱 Introduction
 
-Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
+Terraform is a powerful Infrastructure as Code (IaC) tool developed by HashiCorp that allows you to define and provision infrastructure across multiple providers.
 
-Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id cursus metus aliquam eleifend mi.
+In this guide, we’ll configure Terraform to automate VM provisioning in a Proxmox VE Cluster. This enables reproducible, version-controlled deployments—perfect for home labs or scalable environments.
 
-Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
+---
+
+## 🧩 Prerequisites
+
+| Component               | Requirement                         |
+| ----------------------- | ----------------------------------- |
+| Proxmox VE              | Cluster with at least 2 nodes       |
+| Terraform               | Installed on local machine (latest) |
+| Proxmox API Token       | With sufficient permissions         |
+| Proxmox Provider Plugin | Installed in Terraform              |
+| SSH Key Pair            | For VM access (optional)            |
+
+> 📸 **Photo Suggestion 1**: A diagram showing Terraform on a workstation managing a 3-node Proxmox cluster.
+
+---
+
+## 🔧 Step 1: Install Terraform
+
+### On Linux/macOS:
+
+```bash
+sudo apt install unzip -y
+wget https://releases.hashicorp.com/terraform/<VERSION>/terraform_<VERSION>_linux_amd64.zip
+unzip terraform_*.zip
+sudo mv terraform /usr/local/bin/
+terraform -v
+```
+
+> 📸 **Photo Suggestion 2**: Screenshot of `terraform -v` output.
+
+---
+
+## 🔑 Step 2: Create Proxmox API Token
+
+1. **Login to Proxmox Web UI**
+2. Go to `Datacenter → Permissions → API Tokens`
+3. Create a token for your user (e.g., `terraform@pve`)
+4. Assign necessary privileges (e.g., `VM.Allocate`, `VM.Config.*`, `Datastore.AllocateSpace`, etc.)
+
+> 📸 **Photo Suggestion 3**: Screenshot of API token creation dialog.
+
+---
+
+## 📁 Step 3: Terraform Project Structure
+
+```bash
+terraform-proxmox-cluster/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+└── terraform.tfvars
+```
+
+---
+
+## ✍️ Step 4: main.tf – Proxmox Provider and VM Resource
+
+```hcl
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "~> 2.9.14"
+    }
+  }
+}
+
+provider "proxmox" {
+  pm_api_url = "https://192.168.1.10:8006/api2/json"
+  pm_api_token_id = "terraform@pve!mytoken"
+  pm_api_token_secret = var.pm_api_token_secret
+  pm_tls_insecure = true
+}
+
+resource "proxmox_vm_qemu" "vm1" {
+  name = "tf-vm01"
+  target_node = "pve-node1"
+  clone = "ubuntu-template"
+  cores = 2
+  memory = 2048
+  net0 = "virtio,bridge=vmbr0"
+  os_type = "cloud-init"
+  sshkeys = file("~/.ssh/id_rsa.pub")
+  ciuser = "ubuntu"
+  ipconfig0 = "ip=192.168.1.101/24,gw=192.168.1.1"
+  agent = 1
+  disk {
+    size = "10G"
+    type = "scsi"
+    storage = "local-lvm"
+  }
+}
+```
+
+> 📸 **Photo Suggestion 4**: VSCode screenshot of main.tf opened with syntax highlighting.
+
+---
+
+## 📦 Step 5: variables.tf
+
+```hcl
+variable "pm_api_token_secret" {
+  type = string
+  description = "Proxmox API token secret"
+  sensitive = true
+}
+```
+
+---
+
+## 🧪 Step 6: Initialize and Apply
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+- On `apply`, Terraform will connect to Proxmox API and spin up a VM from the template.
+
+> 📸 **Photo Suggestion 5**: Terminal output of `terraform apply` showing successful creation.
+
+---
+
+## 🎯 Step 7: Verify in Proxmox Dashboard
+
+- Log in to the **Proxmox web UI**
+- You’ll see the VM `tf-vm01` running on `pve-node1`
+
+> 📸 **Photo Suggestion 6**: Proxmox UI showing the newly created VM.
+
+---
+
+## 🔁 Reusability: Scaling to Multiple VMs
+
+You can define a map or a loop to create multiple VMs dynamically:
+
+```hcl
+variable "vm_list" {
+  type = list(string)
+  default = ["tf-vm01", "tf-vm02", "tf-vm03"]
+}
+
+resource "proxmox_vm_qemu" "multi" {
+  count = length(var.vm_list)
+  name = var.vm_list[count.index]
+  ...
+}
+```
+
+> 📸 **Photo Suggestion 7**: Screenshot showing 3 VMs created via loop.
+
+---
+
+## 🔒 Best Practices
+
+- Use **`.tfvars`** and **`.env`** files for secrets.
+- Enable **TLS** and avoid disabling SSL verification in production.
+- Version control your configs with Git.
+- Create **cloud-init** templates to streamline provisioning.
+- Use **modules** for reusable code across environments.
+
+---
+
+## 🧰 Advanced: Using Modules
+
+Create a reusable module:
+
+```hcl
+module "ubuntu_vm" {
+  source = "./modules/ubuntu"
+  name = "tf-vm04"
+  ip = "192.168.1.104"
+}
+```
+
+This makes your infrastructure DRY and modular.
+
+---
+
+## 🧾 Conclusion
+
+By integrating **Terraform** with **Proxmox VE**, you've added **repeatability, automation**, and **version control** to your home lab or test environment. This approach not only improves productivity but also prepares your environment for professional-grade scalability.
+
+---
+
+## 📸 Suggested Photos Summary
+
+| Step | Image                                         |
+| ---- | --------------------------------------------- |
+| 1    | Diagram of Terraform interacting with Proxmox |
+| 2    | Terraform version check                       |
+| 3    | Proxmox API token creation                    |
+| 4    | Screenshot of `main.tf`                       |
+| 5    | `terraform apply` output                      |
+| 6    | Proxmox UI with Terraform VM                  |
+| 7    | Loop-created multiple VMs in dashboard        |
+
+---
+
+Would you like me to:
+
+- 📝 Export this article as a **PDF** with screenshots (real or generated)?
+- 🧱 Generate **Terraform templates** and zip them for download?
+- 🎥 Create an **animated diagram** showing the architecture?
+
+Let me know how you'd like to continue.
