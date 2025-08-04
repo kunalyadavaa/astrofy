@@ -6,10 +6,6 @@ heroImage: "/proxmox.webp"
 tags: ["proxmox", VE, cluster, Homelab, system Specification]
 ---
 
-Here's a specification article for your Proxmox system based on the hardware you've listed:
-
----
-
 ## 🖥️ System Overview
 
 | Component             | Specification                                                |
