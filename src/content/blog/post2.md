@@ -1,8 +1,6 @@
 ---
 title: "Terraform"
-description: "Terraform is a powerful Infrastructure as Code (IaC) tool developed by HashiCorp that allows you to define and provision infrastructure across multiple providers.
-
-In this guide, we’ll configure **Terraform to automate VM provisioning in a Proxmox VE Cluster**. This enables reproducible, version-controlled deployments—perfect for home labs or scalable environments.
+description: "Terraform is a powerful Infrastructure as Code (IaC) tool developed by HashiCorp that allows you to define and provision infrastructure across multiple providers.In this guide, we’ll configure **Terraform to automate VM provisioning in a Proxmox VE Cluster**. This enables reproducible, version-controlled deployments—perfect for home labs or scalable environments.
 pubDate: "March 15 2025"
 heroImage: "/Terraform icon.webp"
 ---
